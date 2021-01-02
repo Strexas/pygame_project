@@ -8,6 +8,7 @@ class Main:
         self.display = display
         self.resolution = display.get_size()
         self.FPS = fps
+        self.speed = 10
         self.status = 'main_menu'
 
         self.main_menu = Main_Menu(self.resolution[0], self.resolution[1], {'Новая игра': self.new_game, 'Об игре': self.game_info, 'Авторы': self.authors, 'Выход': self.exit},
@@ -15,6 +16,8 @@ class Main:
         self.game_menu = Game_Menu(self.resolution[0], self.resolution[1], {'Продолжить': self.resume, 'Назад': self.back, },
                                    self.resolution[0] // 100 * 5)
         
+        self.SPEEDUPEVENT = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.SPEEDUPEVENT, 10000)
 
 
     def back(self):
@@ -46,6 +49,9 @@ class Main:
             if i.type == pygame.KEYDOWN:
                 print('key')
                 self.keyboard_handler(pygame.key.get_pressed())
+            if i.type == self.SPEEDUPEVENT and self.status == 'game':
+                self.game.speed_up()
+
     
     def keyboard_handler(self, keys):
         if self.status == 'game':
