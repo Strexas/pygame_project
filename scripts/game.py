@@ -1,12 +1,12 @@
 import pygame
 import random
-from main import Game
+from main import Main
 
 pygame.init()
 
 display = pygame.display.set_mode((1000, 700))
 clock = pygame.time.Clock()
-game = Game(display)
+game = Main(display)
 
 while True:
     game.event_handler(pygame.event.get())
