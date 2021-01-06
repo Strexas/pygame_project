@@ -10,25 +10,22 @@ class Background:
         self.surface = pygame.Surface((self.width, self.height))
         self.sprite = pygame.transform.scale(sprite, (width, height))
         self.speed = speed
-        self.rects = [pygame.rect.Rect(
-            0, -self.height, self.width, self.height), pygame.rect.Rect(0, 0, self.width, self.height)]
+        self.sy = 0
         self.timer = pygame.time.get_ticks()
 
     def move(self):
         distance = (pygame.time.get_ticks() - self.timer) / 100 * self.speed
         self.timer = pygame.time.get_ticks()
-        for i in self.rects:
-            i.move_ip(0, distance)
-        if self.rects[0].y > -self.speed:
-            del self.rects[-1]
-            self.rects.insert(0, pygame.rect.Rect(
-                0, -self.height, self.width, self.height))
+        self.sy += distance
+        if self.sy > self.height:
+            self.sy = 0
+
 
     def speed_up(self, speed):
         self.speed += speed
 
     def render(self):
         self.move()
-        for i in self.rects:
-            self.surface.blit(self.sprite, i)
+        self.surface.blit(self.sprite, (0, 0), (0, self.height - self.sy, self.width, self.sy))
+        self.surface.blit(self.sprite, (0, self.sy), (0, 0, self.width, self.height - self.sy))
         return self.surface

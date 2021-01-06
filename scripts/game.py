@@ -16,8 +16,10 @@ class Game:
             f'{self.path}/sprites/cars/{i}') for i in os.listdir(f'{self.path}/sprites/cars/')]
         self.bg_sprite = pygame.image.load(
             f'{self.path}/sprites/background/grass.png')
+        self.bullet_sprite = pygame.image.load(
+            f'{self.path}/sprites/interface/bullet.jpeg')
         self.road = Road(width // 4, 0, width // 2,
-                         height, self.car_sprites, speed=self.speed)
+                         height, self.car_sprites, self.bullet_sprite, speed=self.speed)
         self.left_bg = Background(
             0, 0, self.width // 4, self.height, self.bg_sprite, self.speed)
         self.right_bg = Background(
@@ -26,13 +28,19 @@ class Game:
         self.score_font = pygame.font.SysFont('Arial', self.width // 50, True)
 
     def speed_up(self):
-        self.speed += 2
-        self.road.speed_up(2)
-        self.left_bg.speed_up(2)
-        self.right_bg.speed_up(2)
+        self.speed += 1
+        print(self.speed)
+        self.road.speed_up(1)
+        self.left_bg.speed_up(1)
+        self.right_bg.speed_up(1)
+    
+    def cyckle(self):
+        self.score += self.speed / 20
+        if int(self.score) % 250 == 0:
+            print('add')
+            self.road.add_rocket()
 
     def draw_score(self):
-        self.score += self.speed / 20
         x, y = self.width - \
             self.score_font.size(
                 f'score: {int(self.score)}')[0] - 20, self.height // 20
@@ -40,6 +48,7 @@ class Game:
                           (x, y))
 
     def render(self):
+        self.cyckle()
         self.surface.blit(self.road.draw(), (self.road.x, self.road.y))
         self.surface.blit(self.left_bg.render(),
                           (self.left_bg.x, self.left_bg.y))

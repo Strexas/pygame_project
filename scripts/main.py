@@ -3,6 +3,7 @@ import random
 from menu import Game_Menu, Main_Menu
 from game import Game
 
+
 class Main:
     def __init__(self, display, fps=60):
         self.display = display
@@ -15,10 +16,10 @@ class Main:
                                    'racer', self.resolution[0] // 100 * 5, pygame.Color((100, 190, 85)))
         self.game_menu = Game_Menu(self.resolution[0], self.resolution[1], {'Продолжить': self.resume, 'Назад': self.back, },
                                    self.resolution[0] // 100 * 5, alpha=225)
-        
-        self.SPEEDUPEVENT = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.SPEEDUPEVENT, 10000)
 
+        self.SPEEDUPEVENT = pygame.USEREVENT + 1
+        self.GAMEOVEREVENT = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.SPEEDUPEVENT, 100)
 
     def back(self):
         print('main')
@@ -29,6 +30,7 @@ class Main:
 
     def new_game(self):
         self.game = Game(self.resolution[0], self.resolution[1])
+        pygame.time.set_timer(self.SPEEDUPEVENT, 100)
         self.status = 'game'
 
     def game_info(self):
@@ -48,15 +50,17 @@ class Main:
             if i.type == pygame.QUIT:
                 self.exit()
             if i.type == pygame.KEYDOWN:
-                print('key')
                 self.keyboard_handler(pygame.key.get_pressed())
             if i.type == self.SPEEDUPEVENT and self.status == 'game':
                 self.game.speed_up()
+                if self.game.speed > 30:
+                    pygame.time.set_timer(pygame.USEREVENT + 1, 0)
+            if i.type == self.GAMEOVEREVENT:
+                print(self.game.score)
+                self.status = 'main_menu'
 
-    
     def keyboard_handler(self, keys):
         if self.status == 'game':
-            print('game')
             if keys[pygame.K_ESCAPE]:
                 self.status = 'game_menu'
             return
