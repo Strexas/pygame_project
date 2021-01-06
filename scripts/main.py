@@ -14,13 +14,14 @@ class Main:
         self.main_menu = Main_Menu(self.resolution[0], self.resolution[1], {'Новая игра': self.new_game, 'Об игре': self.game_info, 'Авторы': self.authors, 'Выход': self.exit},
                                    'racer', self.resolution[0] // 100 * 5, pygame.Color((100, 190, 85)))
         self.game_menu = Game_Menu(self.resolution[0], self.resolution[1], {'Продолжить': self.resume, 'Назад': self.back, },
-                                   self.resolution[0] // 100 * 5)
+                                   self.resolution[0] // 100 * 5, alpha=225)
         
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(self.SPEEDUPEVENT, 10000)
 
 
     def back(self):
+        print('main')
         self.status = 'main_menu'
 
     def resume(self):

@@ -4,7 +4,7 @@ import pygame
 class Game_Menu:
     def __init__(self, width: int, height: int, objects: dict, font_size: int, menu_background_color=pygame.Color((0, 0, 0)),
                  menu_rect_color=pygame.Color((100, 190, 85)), text_color=pygame.Color((255, 255, 255)),
-                 text_color_focused=pygame.Color((4, 90, 200)), margin=25):
+                 text_color_focused=pygame.Color((4, 90, 200)), margin=25, alpha=125):
         self.width = width
         self.height = height
         self.margin = margin
@@ -13,6 +13,8 @@ class Game_Menu:
         self.label_color = text_color
         self.label_color_focused = text_color_focused
         self.surface = pygame.Surface((self.width, self.height))
+        self.surface_alpha = alpha
+        self.surface.set_alpha(self.surface_alpha)
         self.texts = list(objects.keys())
         self.functions = list(objects.values())
         self.font = pygame.font.SysFont('Arial', font_size, True)
@@ -29,6 +31,9 @@ class Game_Menu:
             i, True, self.label_color) for i in self.texts]
         self.rendered_labels_focused = [self.font.render(
             i, True, self.label_color_focused) for i in self.texts]
+        for x, y in zip(self.rendered_labels, self.rendered_labels_focused):
+            x.set_alpha(self.surface_alpha)
+            y.set_alpha(self.surface_alpha)
         self.timer = pygame.time.get_ticks()
 
     def generate_label_rects(self):
@@ -61,7 +66,7 @@ class Game_Menu:
 
 
 class Main_Menu:
-    def __init__(self, width, height, objects: dict, game_name: str, font_size: int, bg_color: pygame.Color, margin=25,
+    def __init__(self, width, height, objects: dict, game_name: str, font_size: int, bg_color: pygame.Color, margin=35,
                  bottom_margin=150, text_color=pygame.Color((255, 255, 255)), text_color_focused=pygame.Color((4, 90, 200))):
         self.width = width
         self.height = height
