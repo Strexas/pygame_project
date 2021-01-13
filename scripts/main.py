@@ -19,7 +19,7 @@ class Main:
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.SPEEDUPEVENT, 100)
+        pygame.time.set_timer(self.SPEEDUPEVENT, 4000)
 
     def back(self):
         print('main')
