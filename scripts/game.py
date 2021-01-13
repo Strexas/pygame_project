@@ -11,7 +11,7 @@ class Game:
         self.height = height
         self.surface = pygame.Surface((width, height))
         self.speed = speed
-        self.path = '/'.join(os.getcwd().split('/')) + '/data'
+        self.path = 'data'
         self.car_sprites = [pygame.image.load(
             f'{self.path}/sprites/cars/{i}') for i in os.listdir(f'{self.path}/sprites/cars/')]
         self.bg_sprite = pygame.image.load(

@@ -17,7 +17,7 @@ class Game_Menu:
         self.surface.set_alpha(self.surface_alpha)
         self.texts = list(objects.keys())
         self.functions = list(objects.values())
-        self.font = pygame.font.SysFont('Arial', font_size, True)
+        self.font = pygame.font.Font('data/fonts/19255.ttf', font_size)
         self.font_height = self.font.get_height()
         self.menu_width = max([self.font.size(i)[0]
                                for i in self.texts]) + self.margin * 2
@@ -80,7 +80,7 @@ class Main_Menu:
         self.label_color = text_color
         self.label_color_focused = text_color_focused
         self.bg_color = bg_color
-        self.text_font = pygame.font.SysFont('Arial', font_size)
+        self.text_font = pygame.font.Font('data/fonts/19255.ttf', font_size)
         self.name_font = pygame.font.SysFont(
             'Arial', int(font_size * 1.5), True)
         self.rendered_name = self.name_font.render(
