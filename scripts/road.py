@@ -60,7 +60,7 @@ class Road:
         lines = list(range(4))
         y = -self.car_height
         time = pygame.time.get_ticks() - self.spawn_timer
-        chance = self.car_chance - (self.spawn_time - time) / 300000
+        chance = self.car_chance - (self.spawn_time - time) / 200000
         if random.randint(1, 1000) < chance * 1000:
             self.spawn_timer = pygame.time.get_ticks()
             print('spawn')
@@ -193,7 +193,7 @@ class Car:
 
 
 class Person:
-    def __init__(self, x, y, width, height, sprite, rocket_spawn_function):
+    def __init__(self, x, y, width, height, sprite, rocket_spawn_function, **kwargs):
         self.sprite = sprite
         self.width = width
         self.height = height
@@ -203,6 +203,10 @@ class Person:
         self.state = False
         self.rocket_spawn_function = rocket_spawn_function
         self.rocket_timer = pygame.time.get_ticks()
+        if 'rocket_time' in kwargs:
+            self.rocket_time = kwargs['rocket_time']
+        else:
+            self.rocket_time = 500
 
     def speed_up(self, speed):
         self.speed += speed
@@ -220,7 +224,7 @@ class Person:
             self.rect.move_ip(-self.speed - 2, 0)
         if keys[pygame.K_d] and self.rect.x < self.width - self.rect.width:
             self.rect.move_ip(self.speed + 2, 0)
-        if keys[pygame.K_SPACE] and pygame.time.get_ticks() > self.rocket_timer + 2000:
+        if keys[pygame.K_SPACE] and pygame.time.get_ticks() > self.rocket_timer + self.rocket_time:
             self.rocket_timer = pygame.time.get_ticks()
             self.rocket_spawn_function()
         if not self.state and self.rect.y < self.height - self.rect.height:
