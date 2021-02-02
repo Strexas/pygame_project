@@ -1,5 +1,5 @@
 import pygame
-import random
+
 import os
 from main import Main
 os.chdir('..')
