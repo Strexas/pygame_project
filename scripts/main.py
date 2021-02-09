@@ -28,7 +28,7 @@ class Main:
             {'Продолжить': self.resume,
              'Назад': self.back, },
 
-            self.resolution[0] // 100 * 5, alpha=225)
+            self.resolution[0] // 100 * 5)
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
