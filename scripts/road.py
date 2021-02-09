@@ -216,6 +216,7 @@ class Road:
 
     def check_alive(self):
         if self.check_car_collision(self.person.rect):
+            pygame.time.delay(750)
             pygame.event.post(self.GAMEOVEREVENT)
 
     def cyckle(self):

@@ -7,7 +7,7 @@ class Game_Menu:
                  menu_background_color=pygame.Color((0, 0, 0)),
                  menu_rect_color=pygame.Color((100, 190, 85)),
                  text_color=pygame.Color((255, 255, 255)),
-                 text_color_focused=pygame.Color((4, 90, 200)), margin=25, alpha=125):
+                 text_color_focused=pygame.Color((4, 90, 200)), margin=25, alpha=125):  # alpha?
         self.functions = list(objects.values())
 
         self.width = width
@@ -25,7 +25,7 @@ class Game_Menu:
 
         self.texts = list(objects.keys())
         self.font = pygame.font.Font('data/fonts/19255.ttf', font_size)
-        self.font_height = self.font.get_height()
+        self.font_height = font_size
 
         self.menu_width = max([self.font.size(i)[0]
                                for i in self.texts]) + self.margin * 2
