@@ -4,11 +4,11 @@ from game import Game
 
 
 class Main:
-    def __init__(self, display, fps=60):
+    def __init__(self, display, fps):  # передаем игровое окно и FPS
         self.display = display
         self.resolution = display.get_size()
         self.FPS = fps
-        self.speed = 10
+        self.speed = 0
         self.status = 'main_menu'
 
         self.main_menu = Main_Menu(
@@ -19,21 +19,18 @@ class Main:
              'Авторы': self.authors,
              'Выход': self.exit},
 
-            'racer', self.resolution[0] // 100 * 5,
-            pygame.Color((100, 190, 85)))
+            self.resolution[0] // 100 * 5)
 
         self.game_menu = Game_Menu(
             self.resolution[0], self.resolution[1],
 
             {'Продолжить': self.resume,
-             'Назад': self.back, },
+             'Назад': self.back},
 
-            self.resolution[0] // 100 * 5, alpha=225)
+            self.resolution[0] // 100 * 5)
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
-
-        pygame.time.set_timer(self.SPEEDUPEVENT, 4000)
 
     def back(self):
         self.status = 'main_menu'
@@ -55,9 +52,6 @@ class Main:
     def exit(self):
         exit()
 
-    def cickle(self):
-        self.draw()
-
     def event_handler(self, events):
         for i in events:
             if i.type == pygame.QUIT:
@@ -68,21 +62,21 @@ class Main:
 
             if i.type == self.SPEEDUPEVENT and self.status == 'game':
                 self.game.speed_up()
-                if self.game.speed > 30:
+                if self.game.speed > 50:
                     pygame.time.set_timer(pygame.USEREVENT + 1, 0)
 
             if i.type == self.GAMEOVEREVENT:
                 self.status = 'main_menu'
 
     def keyboard_handler(self, keys):
-        if self.status == 'game':
-            if keys[pygame.K_ESCAPE]:
-                self.status = 'game_menu'
+        escape_pressed = keys[pygame.K_ESCAPE]
+
+        if self.status == 'game' and escape_pressed:
+            self.status = 'game_menu'
             return
 
-        if self.status == 'game_menu':
-            if keys[pygame.K_ESCAPE]:
-                self.status = 'game'
+        if self.status == 'game_menu' and escape_pressed:
+            self.status = 'game'
             return
 
     def draw(self):
