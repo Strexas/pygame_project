@@ -7,9 +7,9 @@ class Road:
                  width, height,
                  car_sprites: list,
                  rocket_sprite,
-                 speed=5,
+                 speed,
                  road_color=pygame.Color(40, 40, 40),
-                 car_chance=0.01, rocket_count=5):
+                 car_chance=0.0001, rocket_count=5):
 
         self.width = width
         self.height = height

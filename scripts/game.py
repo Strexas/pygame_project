@@ -5,31 +5,28 @@ from background import Background
 
 
 class Game:
-    def __init__(self, width, height, speed=10):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
         self.surface = pygame.Surface((width, height))
-        self.speed = speed
+        self.speed = 10
         self.path = 'data'
 
         self.car_sprites = [pygame.image.load(
-            f'{self.path}/sprites/cars/{i}') for i in os.listdir(f'{self.path}/sprites/cars/')]
+            f'{self.path}/sprites/cars/{i}') for i in
+            os.listdir(f'{self.path}/sprites/cars/')]
 
         self.bg_sprite = pygame.image.load(
             f'{self.path}/sprites/background/grass.png')
 
         self.bullet_sprite = pygame.image.load(
             f'{self.path}/sprites/interface/bullet.jpeg')
+        self.bullet_sprite.set_colorkey(self.bullet_sprite.get_at((0, 5)))
 
         self.road = Road(width // 4, 0, width // 2,
-                         height, self.car_sprites, self.bullet_sprite, speed=self.speed)
+                         height, self.car_sprites, self.bullet_sprite, self.speed)
 
-        self.left_bg = Background(
-            0, 0, self.width // 4, self.height, self.bg_sprite, self.speed)
-
-        self.right_bg = Background(
-            self.width - self.width // 4, 0, self.width // 4, self.height, self.bg_sprite,
-            self.speed)
+        self.bg = Background(0, 0, self.width, self.height, self.bg_sprite, self.speed)
 
         self.score = 0
 
@@ -38,12 +35,11 @@ class Game:
     def speed_up(self):
         self.speed += 1
         self.road.speed_up(1)
-        self.left_bg.speed_up(1)
-        self.right_bg.speed_up(1)
+        self.bg.speed_up(1)
 
     def cyckle(self):
-        self.score += self.speed / 20
-        if int(self.score) % 250 == 0:
+        self.score += self.speed / 25
+        if int(self.score) % 200 == 0:
             self.road.add_rocket()
 
     def draw_score(self):
@@ -57,13 +53,10 @@ class Game:
     def render(self):
         self.cyckle()
 
+        self.surface.blit(self.bg.render(),
+                          (self.bg.x, self.bg.y))
+
         self.surface.blit(self.road.draw(), (self.road.x, self.road.y))
-
-        self.surface.blit(self.left_bg.render(),
-                          (self.left_bg.x, self.left_bg.y))
-
-        self.surface.blit(self.right_bg.render(),
-                          (self.right_bg.x, self.right_bg.y))
 
         self.draw_score()
 

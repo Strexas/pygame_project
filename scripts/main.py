@@ -1,6 +1,7 @@
 import pygame
 from menu import Game_Menu, Main_Menu
 from game import Game
+from music import channel
 
 
 class Main:
@@ -71,6 +72,16 @@ class Main:
                 self.status = 'main_menu'
 
     def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
+        if keys[pygame.K_h]:
+            print(channel.get_volume())
+            channel.set_volume(channel.get_volume() + 0.01)
+            print(channel.get_volume())
+
+        if keys[pygame.K_l]:
+            print(channel.get_volume())
+            channel.set_volume(channel.get_volume() - 0.01)
+            print(channel.get_volume())
+
         if not (keys[pygame.K_ESCAPE] and 'game' in self.status):
             return
 

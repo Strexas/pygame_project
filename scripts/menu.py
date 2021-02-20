@@ -1,4 +1,6 @@
 import pygame
+from music import Menu_music, Game_music1, Game_music2, channel, pressing, moving
+import os
 
 
 class Menu:
@@ -13,7 +15,6 @@ class Menu:
         self.label_color = pygame.Color((255, 255, 255))
         self.label_color_focused = pygame.Color((4, 90, 200))
         self.bg_color = pygame.Color((100, 190, 85))
-
         self.font = pygame.font.Font('data/fonts/19255.ttf', font_size)
 
         self.surface = pygame.Surface((self.width, self.height))
@@ -26,6 +27,8 @@ class Menu:
             self.rendered_labels_focused.append(self.font.render(i, True, self.label_color_focused))
 
         self.label_rects = []
+
+        self.moving_cursor = (False, -1)
 
     def generate_label_rects(self, y):
         y = y
@@ -50,6 +53,8 @@ class Menu:
 
         for i in range(len(self.texts)):
             if self.label_rects[i].collidepoint(mx, my):
+                if self.moving_cursor[1] != i:
+                    self.moving_cursor = (True, i)
 
                 self.surface.blit(self.rendered_labels_focused[i], self.label_rects[i])
 
@@ -85,6 +90,9 @@ class Game_Menu(Menu):
             y.set_alpha(self.surface_alpha)
 
     def render(self):
+        if self.moving_cursor:
+            moving.play()
+            self.moving_cursor = False
         pygame.draw.rect(self.surface,
                          self.bg_color,
                          self.menu_rect, border_radius=7)
@@ -96,8 +104,9 @@ class Game_Menu(Menu):
 
 class Main_Menu(Menu):
     def __init__(self, width, height, objects: dict, font_size: int):
-
         super().__init__(width, height, objects, font_size)
+
+        channel.play(Menu_music)
 
         self.name_font = pygame.font.SysFont('Arial', int(font_size * 2), True)
 
@@ -109,7 +118,8 @@ class Main_Menu(Menu):
 
         self.rendered_name = self.name_font.render(self.game_name, True, self.label_color)
 
-        self.label_rects = self.generate_label_rects(self.margin * 4 + self.rendered_name.get_height())
+        self.label_rects = self.generate_label_rects(
+            self.margin * 4 + self.rendered_name.get_height())
 
         self.draw_text = self.draw_name(self.draw_text)
 
@@ -121,9 +131,14 @@ class Main_Menu(Menu):
                 self.margin * 2, self.rendered_name.get_width(),
                 self.rendered_name.get_height())
             self.surface.blit(self.rendered_name, self.name_rect)
+
         return decorated_draw
 
     def render(self):
+        if self.moving_cursor[0]:
+            moving.stop()
+            moving.play()
+            self.moving_cursor = (False, self.moving_cursor[1])
         self.surface.fill(self.bg_color)
         self.draw_text()
         return self.surface
