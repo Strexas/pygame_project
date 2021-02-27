@@ -1,6 +1,6 @@
 import pygame
 from music import Menu_music, Game_music1, Game_music2, channel, pressing, moving
-import os
+from random import choice
 
 
 class Menu:
@@ -59,6 +59,10 @@ class Menu:
                 self.surface.blit(self.rendered_labels_focused[i], self.label_rects[i])
 
                 if m1:
+                    if type(self) == type(Main_Menu):
+                        pressing.play()
+                        pygame.time.delay(4000)
+                        channel.play(choice((Game_music1, Game_music2)))
                     self.functions[i]()
             else:
                 self.surface.blit(self.rendered_labels[i], self.label_rects[i])
@@ -90,9 +94,10 @@ class Game_Menu(Menu):
             y.set_alpha(self.surface_alpha)
 
     def render(self):
-        if self.moving_cursor:
+        if self.moving_cursor[0]:
+            moving.stop()
             moving.play()
-            self.moving_cursor = False
+            self.moving_cursor = (False, self.moving_cursor[1])
         pygame.draw.rect(self.surface,
                          self.bg_color,
                          self.menu_rect, border_radius=7)

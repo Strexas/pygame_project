@@ -2,7 +2,6 @@ import pygame as pg
 
 pg.mixer.init()
 
-
 load_music = pg.mixer.Sound
 
 path = 'data/Sounds/'

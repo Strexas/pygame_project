@@ -2,17 +2,17 @@ import pygame
 
 
 class Background:
-    def __init__(self, x, y,
-                 width, height,
-                 sprite, speed):
+    image = pygame.image.load('data/sprites/background/grass.png')
+
+    def __init__(self, surface, x, y, width, height, speed):
         self.x = x
         self.y = y
 
         self.width = width
         self.height = height
 
-        self.surface = pygame.Surface((self.width, self.height))
-        self.sprite = pygame.transform.scale(sprite, (width, height))
+        self.surface = surface
+        self.image = pygame.transform.scale(Background.image, (width, height))
 
         self.speed = speed
         self.sy = 0
@@ -34,15 +34,14 @@ class Background:
         self.move()
 
         self.surface.blit(
-            self.sprite,
+            self.image,
             (0, 0),
             (0, self.height - self.sy,
              self.width, self.sy))
 
         self.surface.blit(
-            self.sprite,
+            self.image,
             (0, self.sy),
-            (0, 0, self.width,
-             self.height - self.sy))
+            (0, 0, int(self.width),
+             int(self.height - self.sy)))
 
-        return self.surface

@@ -33,9 +33,11 @@ class Main:
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
+        self.keys = 0
+        self.keydown = 0
 
     def new_game(self):  # начало игры
-        self.game = Game(self.resolution[0], self.resolution[1])
+        self.game = Game(self.display, self.resolution[0], self.resolution[1], self.keys, self.keydown)
         pygame.time.set_timer(self.SPEEDUPEVENT, 100)
         self.status = 'game'
 
@@ -55,17 +57,19 @@ class Main:
         exit()
 
     def event_handler(self, events):  # перехватчик событий
+        self.keys = pygame.key.get_pressed()
         for i in events:
             if i.type == pygame.QUIT:
                 self.exit()
 
             if i.type == pygame.KEYDOWN:
-                self.keyboard_handler(pygame.key.get_pressed())
+                self.keyboard_handler(self.keys)
+                self.keydown = True
 
             if i.type == self.SPEEDUPEVENT and self.status == 'game':  # ускорение игры
                 self.game.speed_up()
-                if self.game.speed > 50:
-                    self.game.speed = 50
+                if self.game.speed > 30:
+                    self.game.speed = 30
                     pygame.time.set_timer(pygame.USEREVENT + 1, 0)  # перестаем ускорять игру
 
             if i.type == self.GAMEOVEREVENT:  # выход из игры
@@ -73,14 +77,10 @@ class Main:
 
     def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
         if keys[pygame.K_h]:
-            print(channel.get_volume())
             channel.set_volume(channel.get_volume() + 0.01)
-            print(channel.get_volume())
 
         if keys[pygame.K_l]:
-            print(channel.get_volume())
             channel.set_volume(channel.get_volume() - 0.01)
-            print(channel.get_volume())
 
         if not (keys[pygame.K_ESCAPE] and 'game' in self.status):
             return
@@ -91,11 +91,17 @@ class Main:
         self.display.fill((0, 0, 0))
         if self.status == 'main_menu':
             self.display.blit(self.main_menu.render(), (0, 0))
+            pygame.display.update()
 
         if self.status == 'game_menu':
-            self.display.blit(self.game.surface, (0, 0))
+            self.game.render(self.keys, self.keydown)
             self.display.blit(self.game_menu.render(), (0, 0))
+            pygame.display.update()
 
         if self.status == 'game':
-            self.display.blit(self.game.render(), (0, 0))
-        pygame.display.update()
+            self.game.render(self.keys, self.keydown)
+            pygame.display.update()
+            self.game.check()
+            self.keydown = 0
+
+
