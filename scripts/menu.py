@@ -1,5 +1,5 @@
 import pygame
-from music import Menu_music, Game_music1, Game_music2, channel, pressing, moving
+from music import menu_music, game_music, channel, pressing, moving
 from random import choice
 
 
@@ -59,10 +59,13 @@ class Menu:
                 self.surface.blit(self.rendered_labels_focused[i], self.label_rects[i])
 
                 if m1:
+                    pressing.play()
+                    pygame.time.delay(4000)
                     if type(self) == type(Main_Menu):
                         pressing.play()
                         pygame.time.delay(4000)
-                        channel.play(choice((Game_music1, Game_music2)))
+                        channel.play(game_music[0])
+                        channel.queue(game_music[1])
                     self.functions[i]()
             else:
                 self.surface.blit(self.rendered_labels[i], self.label_rects[i])
@@ -74,7 +77,7 @@ class Game_Menu(Menu):
 
         self.margin = 25
 
-        self.surface_alpha = 225
+        self.surface_alpha = 120
         self.surface.set_alpha(self.surface_alpha)
 
         self.font_height = font_size
@@ -111,7 +114,8 @@ class Main_Menu(Menu):
     def __init__(self, width, height, objects: dict, font_size: int):
         super().__init__(width, height, objects, font_size)
 
-        channel.play(Menu_music)
+        channel.play(menu_music[0])
+        channel.queue(menu_music[1])
 
         self.name_font = pygame.font.SysFont('Arial', int(font_size * 2), True)
 

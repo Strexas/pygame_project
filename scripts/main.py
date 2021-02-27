@@ -2,6 +2,7 @@ import pygame
 from menu import Game_Menu, Main_Menu
 from game import Game
 from music import channel
+from road import players, cars, rockets
 
 
 class Main:
@@ -74,6 +75,7 @@ class Main:
 
             if i.type == self.GAMEOVEREVENT:  # выход из игры
                 self.status = 'main_menu'
+                channel.play()
 
     def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
         if keys[pygame.K_h]:
@@ -94,7 +96,11 @@ class Main:
             pygame.display.update()
 
         if self.status == 'game_menu':
-            self.game.render(self.keys, self.keydown)
+            self.game.road.draw_road()
+            players.draw(self.display)
+            cars.draw(self.display)
+            rockets.draw(self.display)
+            self.game.bg.render()
             self.display.blit(self.game_menu.render(), (0, 0))
             pygame.display.update()
 

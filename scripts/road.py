@@ -8,6 +8,7 @@ display = pg.display.set_mode((1000, 700))
 car_sprites = [pg.image.load(f'data/sprites/cars/{i}') for i in
                os.listdir(f'data/sprites/cars/')]
 
+
 class Player(pg.sprite.Sprite):
     image = choice(car_sprites)
 
@@ -110,7 +111,7 @@ class Road:
 
     def spawn_cars(self):
         if randint(1, 100) == 1:
-            Car(randint(200, 500), -400, (0, randint(10, 15)))
+            Car(randint(200, 500), -400, (0, randint(3, 7)))
 
 
 players = pg.sprite.Group()
