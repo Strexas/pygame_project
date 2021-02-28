@@ -48,7 +48,8 @@ class Main:
         self.keydown = 0
 
     def new_game(self):  # начало игры
-        self.game = Game(self.display, self.resolution[0], self.resolution[1], self.keys, self.keydown)
+        self.game = Game(self.display, self.resolution[0], self.resolution[1], self.keys,
+                         self.keydown)
         channel.play(game_music[0])
         channel.queue(game_music[1])
         pygame.time.set_timer(self.SPEEDUPEVENT, 100)
@@ -75,9 +76,7 @@ class Main:
             if i.type == pygame.QUIT:
                 self.exit()
 
-            if i.type == pygame.KEYDOWN:
-                self.keyboard_handler(self.keys)
-                self.keydown = True
+            self.keyboard_handler(self.keys, i)
 
             if i.type == self.SPEEDUPEVENT and self.status == 'game':  # ускорение игры
                 self.game.speed_up()
@@ -95,7 +94,7 @@ class Main:
                     self.scores = int(self.game.score // 10)
                     self.main_menu.update_scores(self.scores)
 
-    def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
+    def keyboard_handler(self, keys, event):  # переход от игрового меню к игре и обратно
         if keys[pygame.K_h]:
             channel.set_volume(channel.get_volume() + 0.01)
 
@@ -105,8 +104,10 @@ class Main:
         if keys[pygame.K_ESCAPE] and (self.status == 'authors' or self.status == 'game_info'):
             self.status = 'main_menu'
 
-        if not (keys[pygame.K_ESCAPE] and 'game' in self.status):
+        if not (keys[pygame.K_ESCAPE] and 'game' in self.status and event.type == pygame.KEYDOWN):
             return
+        else:
+            self.keydown = True
 
         self.status = 'game_menu' if self.status == 'game' else 'game'
 
@@ -125,7 +126,7 @@ class Main:
             pygame.display.update()
 
         if self.status == 'authors':
-            self.display.blit(self.authors_menu.render(), (0,0))
+            self.display.blit(self.authors_menu.render(), (0, 0))
             pygame.display.update()
 
         if self.status == 'game_info':
@@ -137,5 +138,3 @@ class Main:
             pygame.display.update()
             self.game.check()
             self.keydown = 0
-
-

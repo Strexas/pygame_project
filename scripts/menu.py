@@ -60,8 +60,6 @@ class Menu:
                 if m1:
                     pressing.play()
                     pygame.time.delay(2000)
-                    channel.play(game_music[0])
-                    channel.queue(game_music[1])
                     self.functions[i]()
             else:
                 self.surface.blit(self.rendered_labels[i], self.label_rects[i])
