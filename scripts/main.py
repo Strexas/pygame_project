@@ -1,8 +1,9 @@
 import pygame
-from menu import Game_Menu, Main_Menu
+from menu import Game_Menu, Main_Menu, Authors, GameInfo
 from game import Game
 from music import channel, menu_music, game_music
 from road import players, cars, rockets
+import base64
 
 
 class Main:
@@ -13,6 +14,10 @@ class Main:
         self.speed = 0
         self.status = 'main_menu'  # отслеживаем текущее положение
 
+        # загружаем очки
+        self.key = 'qwerty1029'
+        self.scores = int(base64.decodestring(open('data/score', 'rb').read()))
+
         # создание Главного меню
         self.main_menu = Main_Menu(
             self.resolution[0], self.resolution[1],
@@ -22,7 +27,7 @@ class Main:
              'Авторы': self.authors,
              'Выход': self.exit},
 
-            self.resolution[0] // 100 * 5)
+            self.resolution[0] // 100 * 5, self.scores)
         # создание Игрового меню
         self.game_menu = Game_Menu(
             self.resolution[0], self.resolution[1],
@@ -31,6 +36,11 @@ class Main:
              'Назад': self.back},
 
             self.resolution[0] // 100 * 5)
+
+        # создание меню авторов
+        self.authors_menu = Authors(self.resolution[0], self.resolution[1])
+        # создание меню об игре
+        self.game_info_menu = GameInfo(self.resolution[0], self.resolution[1])
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
@@ -49,10 +59,10 @@ class Main:
         self.status = 'game'
 
     def authors(self):
-        pass
+        self.status = 'authors'
 
     def game_info(self):
-        pass
+        self.status = 'game_info'
 
     def exit(self):
         exit()
@@ -77,6 +87,10 @@ class Main:
                 self.status = 'main_menu'
                 channel.play(menu_music[0])
                 channel.queue(menu_music[1])
+                if self.game.score > self.scores:
+                    open('data/score', 'wb').write(base64.encodebytes(str.encode(str(self.game.score))))
+                    self.scores = self.game.score
+                    self.main_menu.update_scores(self.scores)
 
     def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
         if keys[pygame.K_h]:
@@ -84,6 +98,9 @@ class Main:
 
         if keys[pygame.K_l]:
             channel.set_volume(channel.get_volume() - 0.01)
+
+        if keys[pygame.K_ESCAPE] and (self.status == 'authors' or self.status == 'game_info'):
+            self.status = 'main_menu'
 
         if not (keys[pygame.K_ESCAPE] and 'game' in self.status):
             return
@@ -102,6 +119,14 @@ class Main:
             cars.draw(self.display)
             rockets.draw(self.display)
             self.display.blit(self.game_menu.render(), (0, 0))
+            pygame.display.update()
+
+        if self.status == 'authors':
+            self.display.blit(self.authors_menu.render(), (0,0))
+            pygame.display.update()
+
+        if self.status == 'game_info':
+            self.display.blit(self.game_info_menu.render(), (0, 0))
             pygame.display.update()
 
         if self.status == 'game':
