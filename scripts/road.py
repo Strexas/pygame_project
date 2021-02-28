@@ -24,13 +24,13 @@ class Player(pg.sprite.Sprite):
     def update(self, display, keys, keydown):
         keys = keys
         keydown = keydown
-        if keys[pg.K_UP]:
+        if keys[pg.K_UP] and self.rect.y - self.speed > 0:
             self.rect.move_ip(0, -self.speed)
-        if keys[pg.K_DOWN]:
+        if keys[pg.K_DOWN] and self.rect.y + self.rect.height + self.speed < 700:
             self.rect.move_ip(0, self.speed)
-        if keys[pg.K_LEFT]:
+        if keys[pg.K_LEFT] and self.rect.x - self.speed > 200:
             self.rect.move_ip(-self.speed, 0)
-        if keys[pg.K_RIGHT]:
+        if keys[pg.K_RIGHT] and self.rect.x + self.rect.width + self.speed < 800:
             self.rect.move_ip(self.speed, 0)
         if keydown and keys[pg.K_SPACE] and self.rocket_count:
             Rocket(self.rect.center, (0, self.speed - 70))
@@ -41,7 +41,7 @@ class Player(pg.sprite.Sprite):
 
 class Car(pg.sprite.Sprite):
     def __init__(self, x, y, speed):
-        super().__init__(cars)
+        super().__init__()
         self.image = choice(car_sprites)
         self.rect = self.image.get_rect()
         self.mask = pg.mask.from_surface(self.image)
@@ -53,6 +53,10 @@ class Car(pg.sprite.Sprite):
         self.rect.move_ip(self.speed)  # двигаем по дороге
         if self.rect.y > 700:  # если выходит за границу удаляем
             self.kill()
+
+    def stop(self, other):
+        self.speed *= 1.25
+        other.speed *= 1.25
 
 
 class Rocket(pg.sprite.Sprite):
@@ -97,6 +101,7 @@ class Road:
                     players.empty()
 
     def draw_road(self):
+        self.surface.fill('#3f9b0b')
         pg.draw.rect(self.surface, (90, 90, 90), (200, 0, 600, 700))
         for i in range(3):
             pg.draw.rect(display, 'white', (150 * (i + 1) + 200, 0, 7, 700))
@@ -111,7 +116,8 @@ class Road:
 
     def spawn_cars(self):
         if randint(1, 100) == 1:
-            Car(randint(200, 500), -400, (0, randint(3, 7)))
+            test = Car(randint(200, 700), -400, (0, 7))
+
 
 
 players = pg.sprite.Group()

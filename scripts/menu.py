@@ -1,6 +1,5 @@
 import pygame
 from music import menu_music, game_music, channel, pressing, moving
-from random import choice
 
 
 class Menu:
@@ -60,12 +59,9 @@ class Menu:
 
                 if m1:
                     pressing.play()
-                    pygame.time.delay(4000)
-                    if type(self) == type(Main_Menu):
-                        pressing.play()
-                        pygame.time.delay(4000)
-                        channel.play(game_music[0])
-                        channel.queue(game_music[1])
+                    pygame.time.delay(2000)
+                    channel.play(game_music[0])
+                    channel.queue(game_music[1])
                     self.functions[i]()
             else:
                 self.surface.blit(self.rendered_labels[i], self.label_rects[i])
