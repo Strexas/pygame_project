@@ -5,6 +5,7 @@ from random import randint, choice
 pg.init()
 
 display = pg.display.set_mode((1000, 700))
+clock = pg.time.Clock()
 car_sprites = [pg.image.load(f'data/sprites/cars/{i}') for i in
                os.listdir(f'data/sprites/cars/')]
 
@@ -86,6 +87,7 @@ class Road:
     def __init__(self, surface):
         self.surface = surface
         self.GAMEOVEREVENT = pg.event.Event(pg.USEREVENT + 2)
+        self.rects_y = -70
 
     def check(self):
         for i in cars:
@@ -100,11 +102,15 @@ class Road:
                     cars.empty()
                     players.empty()
 
-    def draw_road(self):
+    def draw_road(self, speed):
+        self.rects_y += speed / 7
+        if self.rects_y >= 140:
+            self.rects_y -= 140
         self.surface.fill('#3f9b0b')
         pg.draw.rect(self.surface, (90, 90, 90), (200, 0, 600, 700))
-        for i in range(3):
-            pg.draw.rect(display, 'white', (150 * (i + 1) + 200, 0, 7, 700))
+        for i in range(4):
+            for j in range(-2, 10, 2):
+                pg.draw.rect(self.surface, (255, 255, 255), (120 * (i + 1) + 200, self.rects_y + j * 70, 9, 70))
 
     def draw_sprites(self, keys, keydown):
         players.update(self.surface, keys, keydown)
@@ -114,10 +120,21 @@ class Road:
         cars.draw(self.surface)
         rockets.draw(self.surface)
 
-    def spawn_cars(self):
-        if randint(1, 100) == 1:
-            test = Car(randint(200, 700), -400, (0, 7))
+    def spawn_cars(self, score):
+        if score > 10000:
+            chance = 4 + score / 1000
+        elif score > 5000:
+            chance = 3 + score / 1000
+        elif score > 1000:
+            chance = 2 + score / 1000
+        else:
+            chance = 1 + score / 1000
 
+        if randint(1, 800) <= chance:
+            test = Car(randint(200, 700), -400, (0, 7))
+            while pg.sprite.spritecollideany(test, cars):
+                test = Car(randint(200, 700), -400, (0, 10))
+            cars.add(test)
 
 
 players = pg.sprite.Group()

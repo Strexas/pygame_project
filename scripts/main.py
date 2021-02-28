@@ -69,8 +69,8 @@ class Main:
 
             if i.type == self.SPEEDUPEVENT and self.status == 'game':  # ускорение игры
                 self.game.speed_up()
-                if self.game.speed > 30:
-                    self.game.speed = 30
+                if self.game.speed > 70:
+                    self.game.speed = 70
                     pygame.time.set_timer(pygame.USEREVENT + 1, 0)  # перестаем ускорять игру
 
             if i.type == self.GAMEOVEREVENT:  # выход из игры
