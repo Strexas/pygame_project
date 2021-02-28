@@ -1,5 +1,5 @@
 import pygame
-from menu import Game_Menu, Main_Menu
+from menu import Game_Menu, Main_Menu, Authors, GameInfo
 from game import Game
 from music import channel
 from road import players, cars, rockets
@@ -36,6 +36,11 @@ class Main:
              'Назад': self.back},
 
             self.resolution[0] // 100 * 5)
+        
+        # создание меню авторов
+        self.authors_menu = Authors(self.resolution[0], self.resolution[1])
+        # создание меню об игре
+        self.game_info_menu = GameInfo(self.resolution[0], self.resolution[1])
 
         self.SPEEDUPEVENT = pygame.USEREVENT + 1
         self.GAMEOVEREVENT = pygame.USEREVENT + 2
@@ -54,10 +59,10 @@ class Main:
         self.status = 'game'
 
     def authors(self):
-        pass
+        self.status = 'authors'
 
     def game_info(self):
-        pass
+        self.status = 'game_info'
 
     def exit(self):
         exit()
@@ -91,6 +96,9 @@ class Main:
 
         if keys[pygame.K_l]:
             channel.set_volume(channel.get_volume() - 0.01)
+        
+        if keys[pygame.K_ESCAPE] and (self.status == 'authors' or self.status == 'game_info'):
+            self.status = 'main_menu'
 
         if not (keys[pygame.K_ESCAPE] and 'game' in self.status):
             return
@@ -110,6 +118,14 @@ class Main:
             rockets.draw(self.display)
             self.game.bg.render()
             self.display.blit(self.game_menu.render(), (0, 0))
+            pygame.display.update()
+        
+        if self.status == 'authors':
+            self.display.blit(self.authors_menu.render(), (0,0))
+            pygame.display.update()
+
+        if self.status == 'game_info':
+            self.display.blit(self.game_info_menu.render(), (0, 0))
             pygame.display.update()
 
         if self.status == 'game':

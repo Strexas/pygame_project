@@ -1,4 +1,5 @@
 import pygame
+from pygame.draw import lines
 from music import menu_music, game_music, channel, pressing, moving
 from random import choice
 
@@ -112,6 +113,7 @@ class Game_Menu(Menu):
         return self.surface
 
 
+
 class Main_Menu(Menu):
     def __init__(self, width, height, objects: dict, font_size: int, score: int):
         super().__init__(width, height, objects, font_size)
@@ -158,4 +160,37 @@ class Main_Menu(Menu):
         self.surface.fill(self.bg_color)
         self.surface.blit(self.rendered_scores, (10, 10))
         self.draw_text()
+        return self.surface
+
+
+class Authors:
+    def __init__(self, width, height) -> None:
+        self.surface = pygame.Surface((width, height))
+        self.bg_color = pygame.Color((100, 190, 85))
+        self.font_size = 30
+        self.lines = map(lambda x: x.replace('\n', '') ,open('data/texts/authors.txt', 'r', encoding='utf-8').readlines())
+
+        self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
+        self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
+
+    def render(self):
+        self.surface.fill(self.bg_color)
+        for num, i in enumerate(self.rendered_text):
+            self.surface.blit(i, (10, num * self.font_size + 40))
+        return self.surface
+
+class GameInfo:
+    def __init__(self, width, height) -> None:
+        self.surface = pygame.Surface((width, height))
+        self.bg_color = pygame.Color((100, 190, 85))
+        self.font_size = 30
+        self.lines = map(lambda x: x.replace('\n', '') ,open('data/texts/game_info.txt', 'r', encoding='utf-8').readlines())
+
+        self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
+        self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
+
+    def render(self):
+        self.surface.fill(self.bg_color)
+        for num, i in enumerate(self.rendered_text):
+            self.surface.blit(i, (10, num * self.font_size + 40))
         return self.surface
