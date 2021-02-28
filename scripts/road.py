@@ -106,7 +106,8 @@ class Road:
         pg.draw.rect(self.surface, (90, 90, 90), (200, 0, 600, 700))
         for i in range(4):
             for j in range(-2, 10, 2):
-                pg.draw.rect(self.surface, (255, 255, 255), (120 * (i + 1) + 200, self.rects_y + j * 70, 9, 70))
+                pg.draw.rect(self.surface, (255, 255, 255),
+                             (120 * (i + 1) + 200, self.rects_y + j * 70, 9, 70))
 
     def draw_sprites(self, keys, keydown):
         players.update(self.surface, keys, keydown)
@@ -131,6 +132,7 @@ class Road:
             while pg.sprite.spritecollideany(test, cars):
                 test = Car(choice((randint(200, 700), players.sprites()[0].rect.x)), -400, (0, 10))
             cars.add(test)
+
 
 players = pg.sprite.Group()
 cars = pg.sprite.Group()

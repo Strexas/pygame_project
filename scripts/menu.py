@@ -1,5 +1,4 @@
 import pygame
-from pygame.draw import lines
 from music import menu_music, game_music, channel, pressing, moving
 
 
@@ -86,10 +85,8 @@ class Game_Menu(Menu):
         self.menu_rect = pygame.rect.Rect((self.width - self.menu_width) // 2,
                                           (self.height - self.menu_height) // 2,
                                           self.menu_width, self.menu_height)
-        
 
         self.label_rects = self.generate_label_rects(self.menu_rect.y + self.margin)
-
 
         for x, y in zip(self.rendered_labels, self.rendered_labels_focused):
             x.set_alpha(self.surface_alpha)
@@ -107,7 +104,6 @@ class Game_Menu(Menu):
         self.draw_text()
 
         return self.surface
-
 
 
 class Main_Menu(Menu):
@@ -131,11 +127,13 @@ class Main_Menu(Menu):
         self.draw_text = self.draw_name(self.draw_text)
         self.score_font = pygame.font.Font('data/fonts/19255.ttf', font_size - 20)
         self.scores = score
-        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True, self.label_color)
-    
+        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True,
+                                                      self.label_color)
+
     def update_scores(self, score):
         self.scores = score
-        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True, self.label_color)
+        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True,
+                                                      self.label_color)
 
     def draw_name(self, func):
         def decorated_draw():
@@ -164,7 +162,8 @@ class Authors:
         self.surface = pygame.Surface((width, height))
         self.bg_color = pygame.Color((100, 190, 85))
         self.font_size = 30
-        self.lines = map(lambda x: x.replace('\n', '') ,open('data/texts/authors.txt', 'r', encoding='utf-8').readlines())
+        self.lines = map(lambda x: x.replace('\n', ''),
+                         open('data/texts/authors.txt', 'r', encoding='utf-8').readlines())
 
         self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
         self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
@@ -175,12 +174,14 @@ class Authors:
             self.surface.blit(i, (10, num * self.font_size + 40))
         return self.surface
 
+
 class GameInfo:
     def __init__(self, width, height) -> None:
         self.surface = pygame.Surface((width, height))
         self.bg_color = pygame.Color((100, 190, 85))
         self.font_size = 30
-        self.lines = map(lambda x: x.replace('\n', '') ,open('data/texts/game_info.txt', 'r', encoding='utf-8').readlines())
+        self.lines = map(lambda x: x.replace('\n', ''),
+                         open('data/texts/game_info.txt', 'r', encoding='utf-8').readlines())
 
         self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
         self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
