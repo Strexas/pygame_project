@@ -114,7 +114,7 @@ class Main:
             pygame.display.update()
 
         if self.status == 'game_menu':
-            self.game.road.draw_road()
+            self.game.road.draw_road(self.speed)
             players.draw(self.display)
             cars.draw(self.display)
             rockets.draw(self.display)

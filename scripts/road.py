@@ -55,10 +55,6 @@ class Car(pg.sprite.Sprite):
         if self.rect.y > 700:  # если выходит за границу удаляем
             self.kill()
 
-    def stop(self, other):
-        self.speed *= 1.25
-        other.speed *= 1.25
-
 
 class Rocket(pg.sprite.Sprite):
     image1 = pg.image.load('data/sprites/interface/rocket.png')
@@ -122,20 +118,19 @@ class Road:
 
     def spawn_cars(self, score):
         if score > 10000:
-            chance = 4 + score / 1000
+            chance = 5 + score / 1000
         elif score > 5000:
-            chance = 3 + score / 1000
+            chance = 4 + score / 1000
         elif score > 1000:
-            chance = 2 + score / 1000
+            chance = 3 + score / 1000
         else:
-            chance = 1 + score / 1000
+            chance = 2 + score / 1000
 
         if randint(1, 800) <= chance:
             test = Car(randint(200, 700), -400, (0, 7))
             while pg.sprite.spritecollideany(test, cars):
-                test = Car(randint(200, 700), -400, (0, 10))
+                test = Car(choice((randint(200, 700), players.sprites()[0].rect.x)), -400, (0, 10))
             cars.add(test)
-
 
 players = pg.sprite.Group()
 cars = pg.sprite.Group()

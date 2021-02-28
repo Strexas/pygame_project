@@ -31,10 +31,10 @@ class Game:
 
     def draw_score(self):
         x, y = self.width - \
-               self.score_font.size(f'score: {int(self.score)}')[0] \
+               self.score_font.size(f'score: {int(self.score // 10)}')[0] \
                - 20, self.height // 20
         self.surface.blit(
-            self.score_font.render(f'score: {int(self.score)}',
+            self.score_font.render(f'score: {int(self.score // 10)}',
                                    False, (255, 255, 255)), (x, y))
 
     def render(self, keys, keydown):
