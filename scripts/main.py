@@ -3,6 +3,7 @@ from menu import Game_Menu, Main_Menu
 from game import Game
 from music import channel
 from road import players, cars, rockets
+import base64
 
 
 class Main:
@@ -13,6 +14,10 @@ class Main:
         self.speed = 0
         self.status = 'main_menu'  # отслеживаем текущее положение
 
+        # загружаем очки
+        self.key = 'qwerty1029'
+        self.scores = int(base64.decodestring(open('data/score', 'rb').read()))
+
         # создание Главного меню
         self.main_menu = Main_Menu(
             self.resolution[0], self.resolution[1],
@@ -22,7 +27,7 @@ class Main:
              'Авторы': self.authors,
              'Выход': self.exit},
 
-            self.resolution[0] // 100 * 5)
+            self.resolution[0] // 100 * 5, self.scores)
         # создание Игрового меню
         self.game_menu = Game_Menu(
             self.resolution[0], self.resolution[1],
@@ -75,7 +80,10 @@ class Main:
 
             if i.type == self.GAMEOVEREVENT:  # выход из игры
                 self.status = 'main_menu'
-                channel.play()
+                if self.game.score > self.scores:
+                    open('data/score', 'wb').write(base64.encodebytes(str.encode(str(self.game.score))))
+                    self.scores = self.game.score
+                    self.main_menu.update_scores(self.scores)
 
     def keyboard_handler(self, keys):  # переход от игрового меню к игре и обратно
         if keys[pygame.K_h]:

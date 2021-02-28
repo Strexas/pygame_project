@@ -89,8 +89,10 @@ class Game_Menu(Menu):
         self.menu_rect = pygame.rect.Rect((self.width - self.menu_width) // 2,
                                           (self.height - self.menu_height) // 2,
                                           self.menu_width, self.menu_height)
+        
 
         self.label_rects = self.generate_label_rects(self.menu_rect.y + self.margin)
+
 
         for x, y in zip(self.rendered_labels, self.rendered_labels_focused):
             x.set_alpha(self.surface_alpha)
@@ -111,7 +113,7 @@ class Game_Menu(Menu):
 
 
 class Main_Menu(Menu):
-    def __init__(self, width, height, objects: dict, font_size: int):
+    def __init__(self, width, height, objects: dict, font_size: int, score: int):
         super().__init__(width, height, objects, font_size)
 
         channel.play(menu_music[0])
@@ -126,11 +128,16 @@ class Main_Menu(Menu):
         self.game_name = 'Racer'
 
         self.rendered_name = self.name_font.render(self.game_name, True, self.label_color)
-
         self.label_rects = self.generate_label_rects(
             self.margin * 4 + self.rendered_name.get_height())
-
         self.draw_text = self.draw_name(self.draw_text)
+        self.score_font = pygame.font.Font('data/fonts/19255.ttf', font_size - 20)
+        self.scores = score
+        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True, self.label_color)
+    
+    def update_scores(self, score):
+        self.scores = score
+        self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True, self.label_color)
 
     def draw_name(self, func):
         def decorated_draw():
@@ -149,5 +156,6 @@ class Main_Menu(Menu):
             moving.play()
             self.moving_cursor = (False, self.moving_cursor[1])
         self.surface.fill(self.bg_color)
+        self.surface.blit(self.rendered_scores, (10, 10))
         self.draw_text()
         return self.surface
