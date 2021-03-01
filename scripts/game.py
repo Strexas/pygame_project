@@ -11,7 +11,7 @@ class Game:
         self.speed = 10
 
         self.gamer = Player(5)
-        self.road = Road(surface)
+        self.road = Road()
 
         self.score = 0
 

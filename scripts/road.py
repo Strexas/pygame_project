@@ -22,7 +22,7 @@ class Player(pg.sprite.Sprite):
         self.speed = speed
         self.rocket_count = 5
 
-    def update(self, display, keys, keydown):
+    def update(self, keys, keydown):
         keys = keys
         keydown = keydown
         if keys[pg.K_UP] and self.rect.y - self.speed > 0:
@@ -80,8 +80,7 @@ class Rocket(pg.sprite.Sprite):
 
 
 class Road:
-    def __init__(self, surface):
-        self.surface = surface
+    def __init__(self):
         self.GAMEOVEREVENT = pg.event.Event(pg.USEREVENT + 2)
         self.rects_y = -70
 
@@ -102,20 +101,20 @@ class Road:
         self.rects_y += speed / 7
         if self.rects_y >= 140:
             self.rects_y -= 140
-        self.surface.fill('#3f9b0b')
-        pg.draw.rect(self.surface, (90, 90, 90), (200, 0, 600, 700))
+        display.fill('#3f9b0b')
+        pg.draw.rect(display, (90, 90, 90), (200, 0, 600, 700))
         for i in range(4):
             for j in range(-2, 10, 2):
-                pg.draw.rect(self.surface, (255, 255, 255),
+                pg.draw.rect(display, (255, 255, 255),
                              (120 * (i + 1) + 200, self.rects_y + j * 70, 9, 70))
 
     def draw_sprites(self, keys, keydown):
-        players.update(self.surface, keys, keydown)
+        players.update(keys, keydown)
         cars.update()
         rockets.update()
-        players.draw(self.surface)
-        cars.draw(self.surface)
-        rockets.draw(self.surface)
+        players.draw(display)
+        cars.draw(display)
+        rockets.draw(display)
 
     def spawn_cars(self, score):
         if score > 10000:
