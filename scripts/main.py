@@ -52,7 +52,7 @@ class Main:
                          self.keydown)
         channel.play(game_music[0])
         channel.queue(game_music[1])
-        pygame.time.set_timer(self.SPEEDUPEVENT, 100)
+        pygame.time.set_timer(self.SPEEDUPEVENT, 400)
         self.status = 'game'
 
     def back(self):

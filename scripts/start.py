@@ -1,7 +1,6 @@
 import pygame
 import os
 
-os.chdir('..')  # вернулись на папку выше
 
 from main import Main  # класс отвечающий за игру
 

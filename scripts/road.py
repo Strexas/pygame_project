@@ -12,12 +12,14 @@ car_sprites = [pg.image.load(f'data/sprites/cars/{i}') for i in
 
 class Player(pg.sprite.Sprite):
     image = choice(car_sprites)
+    
 
     def __init__(self, speed):
         super().__init__(players)
         self.image = Player.image
         self.rect = self.image.get_rect()
         self.mask = pg.mask.from_surface(self.image)
+        self.timer = pg.time.get_ticks()
         self.rect.center = (500, 500)
         self.speed = speed
         self.rocket_count = 5
@@ -33,7 +35,8 @@ class Player(pg.sprite.Sprite):
             self.rect.move_ip(-self.speed, 0)
         if keys[pg.K_RIGHT] and self.rect.x + self.rect.width + self.speed < 800:
             self.rect.move_ip(self.speed, 0)
-        if keydown and keys[pg.K_SPACE] and self.rocket_count:
+        if pg.time.get_ticks() > self.timer + 200 and keys[pg.K_SPACE] and self.rocket_count:
+            self.timer = pg.time.get_ticks()
             Rocket(self.rect.center, (0, self.speed - 70))
             self.rocket_count -= 1
         for i in range(self.rocket_count):
