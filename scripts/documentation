@@ -1,0 +1,1773 @@
+Документация
+start.py
+
+import pygame
+import os
+
+os.chdir('..')  - вернулись на папку выше
+
+from main import Main  - класс отвечающий за игру
+
+pygame.init() - инициализация
+display = pygame.display.set_mode((1000, 700))  - создали игровое окно
+clock = pygame.time.Clock() - создание объекта для контроля времени
+fps = 100  - fps игры
+main = Main(display, fps)  - передали его на изменения в класс Main
+
+
+while True: - основной цикл игры
+   main.event_handler(pygame.event.get()) - перехватчик событий
+   main.draw()  - отрисовка
+   clock.tick(fps)  - FPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+main.py
+import pygame
+from menu import Game_Menu, Main_Menu, Authors, GameInfo
+from game import Game
+from music import channel, menu_music, game_music
+from road import players, cars, rockets
+
+
+class Main:
+   def __init__(self, display, fps):  - передаем игровое окно и FPS
+       self.display = display - экран
+       self.resolution = display.get_size() - разрешение
+       self.FPS = fps - фпс
+       self.speed = 0 - начальная скорость 0
+       self.status = 'main_menu'  - отслеживаем текущее положение
+
+       # загружаем очки
+       self.key = 'qwerty1029'
+       with open('data/score.txt') as f:
+           self.scores = int(f.readline())
+
+       # создание Главного меню
+       self.main_menu = Main_Menu(
+           self.resolution[0], self.resolution[1],
+
+           {'Новая игра': self.new_game,
+            'Об игре': self.game_info,
+            'Авторы': self.authors,
+            'Выход': self.exit},
+
+           self.resolution[0] // 100 * 5, self.scores)
+       # создание Игрового меню
+       self.game_menu = Game_Menu(
+           self.resolution[0], self.resolution[1],
+
+           {'Продолжить': self.resume,
+            'Назад': self.back},
+
+           self.resolution[0] // 100 * 5)
+
+       # создание меню авторов
+       self.authors_menu = Authors(self.resolution[0], self.resolution[1])
+       # создание меню об игре
+       self.game_info_menu = GameInfo(self.resolution[0], self.resolution[1])
+
+       self.SPEEDUPEVENT = pygame.USEREVENT + 1
+       self.GAMEOVEREVENT = pygame.USEREVENT + 2 - событие выхода
+       self.keys = 0 - нажатые клавиши
+       self.keydown = 0 - клавиша нажата
+
+   def new_game(self):  # начало игры
+       self.game = Game(self.display, self.resolution[0], self.resolution[1], self.keys,
+                        self.keydown)
+	  #  включение музыки
+       channel.play(game_music[0])
+       channel.queue(game_music[1])
+       pygame.time.set_timer(self.SPEEDUPEVENT, 100)
+       self.status = 'game'
+
+   def back(self): - меняет статус на main_menu, возвращая в начало
+       self.status = 'main_menu'
+
+   def resume(self): - меняет статус на ‘game’, возобновляет игру
+       self.status = 'game'
+
+   def authors(self): - меняет статус на ‘authors’
+       self.status = 'authors'
+
+   def game_info(self): - меняет статус на ‘game_info’
+       self.status = 'game_info'
+
+   def exit(self): - Выход из игры, прекращение работы программы
+       exit()
+
+   def event_handler(self, events):  - перехватчик событий
+       self.keys = pygame.key.get_pressed() - все нажатые кнопки
+       for i in events: - перебор событий
+           if i.type == pygame.QUIT: выход в случае нажатия кнопки закрыть
+               self.exit()
+
+           self.keyboard_handler(self.keys, i) - перехватчик событий клавиатуры
+
+           if i.type == self.SPEEDUPEVENT and self.status == 'game':  - ускорение игры
+               self.game.speed_up()
+               if self.game.speed > 70:
+                   self.game.speed = 70
+                   pygame.time.set_timer(pygame.USEREVENT + 1, 0)  - достигаем лимита скорости перестаем ускорять игру
+
+           if i.type == self.GAMEOVEREVENT:  - выход из игры в главное меню
+               self.status = 'main_menu'
+               channel.play(menu_music[0]) - начинаем проигрывать музыку меню
+               channel.queue(menu_music[1])
+               if self.game.score // 10 > self.scores: - фиксируем результат
+                   with open('data/score.txt', 'w') as w:
+                       w.write(str(int(self.game.score // 10)))
+                   self.scores = int(self.game.score // 10)
+                   self.main_menu.update_scores(self.scores)
+
+   def keyboard_handler(self, keys, event):  - перехват событий клавиатуры
+       if keys[pygame.K_h]: - повышаем звук
+           channel.set_volume(channel.get_volume() + 0.01)
+
+       if keys[pygame.K_l]: - понижаем звук
+           channel.set_volume(channel.get_volume() - 0.01)
+
+       if keys[pygame.K_ESCAPE] and (self.status == 'authors' or self.status == 'game_info'):
+           self.status = 'main_menu' - выход в главное мменю если нажат escape
+
+       if not (keys[pygame.K_ESCAPE] and 'game' in self.status and event.type == pygame.KEYDOWN): 
+           return
+       else:
+           self.keydown = True
+
+       self.status = 'game_menu' if self.status == 'game' else 'game'
+
+   def draw(self):  - отрисовка в зависимости от текущего положения
+       self.display.fill((0, 0, 0)) - заполним все черным
+       if self.status == 'main_menu':
+           self.display.blit(self.main_menu.render(), (0, 0))
+           pygame.display.update()
+
+       if self.status == 'game_menu':
+           self.game.road.draw_road(self.speed)
+           players.draw(self.display)
+           cars.draw(self.display)
+           rockets.draw(self.display)
+           self.display.blit(self.game_menu.render(), (0, 0))
+           pygame.display.update()
+
+       if self.status == 'authors':
+           self.display.blit(self.authors_menu.render(), (0, 0))
+           pygame.display.update()
+
+       if self.status == 'game_info':
+           self.display.blit(self.game_info_menu.render(), (0, 0))
+           pygame.display.update()
+
+       if self.status == 'game':
+           self.game.render(self.keys, self.keydown)
+           pygame.display.update()
+           self.game.check()
+           self.keydown = 0
+class Main - класс в котором происходят все действия игры: отрисовка экрана, вычисления, работа с событиями
+	
+draw() - рисует экран
+	
+new_game() - создает класс Game, т е запускает новую игру
+	
+back() - возвращает в главное меню
+	
+resume() - продолжение игры
+	
+authors() - вызов окна об авторах
+	
+game_info() вызов окна об игре
+	
+exit() - выход из игры
+	
+event_handler() - основной перехватчик событий
+	
+keyboard_handler() - вспомогательный перехватчик(клавиатуры)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+game.py
+
+
+
+import pygame
+
+
+
+
+
+
+
+from road import *
+
+
+
+
+
+
+
+
+
+
+
+
+class Game: - класс игры
+
+
+   def __init__(self, surface, width, height, keys, keydown):
+
+
+       self.width = width - ширина окна
+
+
+       self.height = height - высота окна
+
+
+       self.surface = surface - поверхность
+
+
+       self.speed = 10 - начальная скорость
+
+
+
+
+
+
+
+       self.gamer = Player(5) - создание класса игрока
+
+
+       self.road = Road() - создание класса дороги
+
+
+
+
+
+
+
+       self.score = 0 - начальный счет 0
+
+
+
+
+
+
+
+       self.score_font = pygame.font.SysFont('Arial', self.width // 50, True) - шрифт счета
+
+
+       self.keys = keys - нажатые клавиши
+
+
+       self.keydown = keydown - была ли нажата клавиши
+
+
+       self.k = 0 - счетчик итераций
+
+
+
+
+
+
+
+   def speed_up(self):
+
+
+       self.speed += 1 - увеличиваем скорость на 1
+
+
+
+
+
+
+
+   def cyckle(self):
+
+
+       self.score += self.speed / 25 - прибавление к счету
+
+
+       self.k += 1 - плюс к итерации
+
+
+       if self.k % 200 == 0 and self.gamer.rocket_count < 4:
+
+
+           self.gamer.rocket_count += 1 - при условиях добавление ракеты
+
+
+
+
+
+
+
+   def draw_score(self): - отрисовка счета
+
+
+       x, y = self.width - \
+
+
+              self.score_font.size(f'score: {int(self.score // 10)}')[0] \
+
+
+              - 20, self.height // 20
+
+
+       self.surface.blit(
+
+
+           self.score_font.render(f'score: {int(self.score // 10)}',
+
+
+                                  False, (255, 255, 255)), (x, y))
+
+
+
+
+
+
+
+   def render(self, keys, keydown):
+
+
+       self.road.draw_road(self.speed) - отрисовка дороги
+
+
+       self.road.draw_sprites(keys, keydown) - отрисовка всех спрайтов
+
+
+       self.draw_score() - отрисовка счета
+
+
+
+
+
+
+
+   def check(self):
+
+
+       self.cyckle()
+
+
+       self.road.check() - проверка на столкновения
+
+
+       self.road.spawn_cars(self.score) - спавн машин
+
+class Game - класс отвечающий за все действия во время игрового процесса, проверка столкновений, счет, отрисовку окна во время самой игры
+
+speed_up() - увеличение скорости игры
+
+cycle() - увеличение счета, прибавление ракеты
+
+draw_score() - отрисовка счета
+
+render() - отрисовка всего
+
+check()  - проверка столкновений
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+music.py
+
+
+
+import pygame as pg
+
+
+from random import randint
+
+
+
+
+
+
+
+
+
+
+
+
+pg.mixer.init() - инициализация
+
+
+
+
+
+
+
+load_music = pg.mixer.Sound 
+
+
+
+
+
+
+
+path = 'data/Sounds/'
+
+
+
+#  загрузка всех звуков
+
+
+Menu_music1 = load_music(path + 'music/Menu/MM1.mp3')
+
+
+Menu_music2 = load_music(path + 'music/Menu/MM2.mp3')
+
+
+menu_music = [Menu_music2, Menu_music1]
+
+
+Game_music1 = load_music(path + 'music/Game/GM1.mp3')
+
+
+Game_music2 = load_music(path + 'music/Game/GM2.mp3')
+
+
+game_music = [Game_music1, Game_music2]
+
+
+if randint(0, 1):
+
+
+   game_music = game_music[::-1]
+
+
+if randint(0, 1):
+
+
+   menu_music = menu_music[::-1]
+
+
+
+
+
+
+
+
+
+
+
+
+moving = load_music(path + 'SFX/moving.mp3')
+
+
+pressing = load_music(path + 'SFX/pressing.mp3')
+
+
+channel = pg.mixer.Channel(1) - создание объекта воспроизведения
+
+
+
+
+
+
+
+road.py
+
+
+
+import pygame as pg
+
+
+import os
+
+
+from random import randint, choice
+
+
+
+
+
+
+
+pg.init()
+
+
+
+
+
+
+
+display = pg.display.set_mode((1000, 700))
+
+
+clock = pg.time.Clock()
+
+
+car_sprites = [pg.image.load(f'data/sprites/cars/{i}') for i in
+
+
+              os.listdir(f'data/sprites/cars/')] - загрузка спрайтов машин
+
+
+
+
+
+
+
+
+
+
+
+
+class Player(pg.sprite.Sprite):
+
+
+   image = choice(car_sprites) - машина игрока
+
+
+  
+
+
+
+
+
+
+
+   def __init__(self, speed):
+
+
+       super().__init__(players)
+
+
+       self.image = Player.image - машина игрока
+
+
+       self.rect = self.image.get_rect()
+
+
+       self.mask = pg.mask.from_surface(self.image)
+
+
+       self.timer = pg.time.get_ticks()
+
+
+       self.rect.center = (500, 500)
+
+
+       self.speed = speed - скорость машины
+
+
+       self.rocket_count = 5 - кол во ракет
+
+
+
+
+
+
+
+   def update(self, keys, keydown):
+
+
+       keys = keys - нажатые клавиши
+
+
+       keydown = keydown - была ли нажата клавиша
+# управление машиной в зависимости от нажатой клавиши
+
+
+       if keys[pg.K_UP] and self.rect.y - self.speed > 0:
+
+
+           self.rect.move_ip(0, -self.speed)
+
+
+       if keys[pg.K_DOWN] and self.rect.y + self.rect.height + self.speed < 700:
+
+
+           self.rect.move_ip(0, self.speed)
+
+
+       if keys[pg.K_LEFT] and self.rect.x - self.speed > 200:
+
+
+           self.rect.move_ip(-self.speed, 0)
+
+
+       if keys[pg.K_RIGHT] and self.rect.x + self.rect.width + self.speed < 800:
+
+
+           self.rect.move_ip(self.speed, 0)
+
+
+       if pg.time.get_ticks() > self.timer + 200 and keys[pg.K_SPACE] and self.rocket_count: - добавление ракет
+
+
+           self.timer = pg.time.get_ticks()
+
+
+           Rocket(self.rect.center, (0, self.speed - 70))
+
+
+           self.rocket_count -= 1
+
+
+       for i in range(self.rocket_count): - отрисовка ракет
+
+
+           display.blit(Rocket.image22, (Rocket.image22.get_width() * i, 0))
+
+
+
+
+
+
+
+
+
+
+
+
+class Car(pg.sprite.Sprite):
+
+
+   def __init__(self, x, y, speed):
+
+
+       super().__init__()
+
+
+       self.image = choice(car_sprites) - изображение машины
+
+
+       self.rect = self.image.get_rect()
+
+
+       self.mask = pg.mask.from_surface(self.image)
+# координаты
+
+
+       self.rect.x = x 
+
+
+       self.rect.y = y
+
+
+       self.speed = speed - скорость машины
+
+
+
+
+
+
+
+   def update(self):
+
+
+       self.rect.move_ip(self.speed)  - двигаем по дороге
+
+
+       if self.rect.y > 700:  - если выходит за границу удаляем
+
+
+           self.kill()
+
+
+
+
+
+
+
+
+
+
+
+
+class Rocket(pg.sprite.Sprite):
+
+
+   image1 = pg.image.load('data/sprites/interface/rocket.png') -изображение ракеты для пуляния
+
+
+   image1.convert_alpha()
+
+
+   image12 = pg.transform.scale(image1, (50, 189))
+
+
+   image2 = pg.image.load('data/sprites/interface/rocket2.png') - изображение игры для отрисовки
+
+
+   image2.convert_alpha()
+
+
+   image22 = pg.transform.scale(image2, (40, 93))
+
+
+
+
+
+
+
+   def __init__(self, xy, speed):
+
+
+       super().__init__(rockets)
+
+
+       self.image = Rocket.image12
+
+
+       self.rect = self.image.get_rect()
+
+
+       self.mask = pg.mask.from_surface(self.image12)
+# координаты
+
+
+       self.rect.x, self.rect.y = xy
+
+
+       self.rect.x -= 28
+
+
+       self.speed = speed - скорость
+
+
+
+
+
+
+
+   def update(self):
+
+
+       self.rect.move_ip(self.speed) - двигаем
+
+
+       if self.rect.y < -500: выходит за рамки удаляем
+
+
+           self.kill()
+
+
+
+
+
+
+
+
+
+
+
+
+class Road:
+
+
+   def __init__(self):
+
+
+       self.GAMEOVEREVENT = pg.event.Event(pg.USEREVENT + 2) - событие выхода
+
+
+       self.rects_y = -70 - координаты начала полосы
+
+
+
+
+
+
+
+   def check(self):
+проверка на пересечение машин с ракетами и игроком,
+если пересекаются машина и ракета удаляем обоих, машина и игрок- выходим из игры и обнуляем группы спрайтов
+
+
+       for i in cars:
+
+
+           for j in rockets:
+
+
+               if pg.sprite.collide_mask(i, j):
+
+
+                   i.kill()
+
+
+                   j.kill()
+
+
+           for j in players:
+
+
+               if pg.sprite.collide_mask(i, j):
+
+
+                   pg.time.delay(1000)
+
+
+                   pg.event.post(self.GAMEOVEREVENT)
+
+
+                   cars.empty()
+
+
+                   players.empty()
+
+
+
+
+
+
+
+   def draw_road(self, speed):
+отрисовка дороги
+
+
+       self.rects_y += speed / 7
+
+
+       if self.rects_y >= 140:
+
+
+           self.rects_y -= 140
+
+
+       display.fill('#3f9b0b')
+
+
+       pg.draw.rect(display, (90, 90, 90), (200, 0, 600, 700))
+отрисовка полос дороги
+
+
+       for i in range(4):
+
+
+           for j in range(-2, 10, 2):
+
+
+               pg.draw.rect(display, (255, 255, 255),
+
+
+                            (120 * (i + 1) + 200, self.rects_y + j * 70, 9, 70))
+
+
+
+
+
+
+
+   def draw_sprites(self, keys, keydown):
+отрисовка всех имеющихся спрайтов и дороги
+
+
+       players.update(keys, keydown)
+
+
+       cars.update()
+
+
+       rockets.update()
+
+
+       players.draw(display)
+
+
+       cars.draw(display)
+
+
+       rockets.draw(display)
+
+
+
+
+
+
+
+   def spawn_cars(self, score):
+усложниние игры по мере развития, спавн машин
+
+
+       if score > 10000:
+
+
+           chance = 5 + score / 1000
+
+
+       elif score > 5000:
+
+
+           chance = 4 + score / 1000
+
+
+       elif score > 1000:
+
+
+           chance = 3 + score / 1000
+
+
+       else:
+
+
+           chance = 2 + score / 1000
+
+
+
+
+
+
+
+       if randint(1, 800) <= chance:
+
+
+           test = Car(randint(200, 700), -400, (0, 7))
+
+
+           while pg.sprite.spritecollideany(test, cars): проверка на пересечение с уже имеющимися машинами
+
+
+               test = Car(choice((randint(200, 700), players.sprites()[0].rect.x)), -400, (0, 10))
+
+
+           cars.add(test)
+
+
+
+
+
+
+
+
+
+
+
+
+players = pg.sprite.Group() - группа для игрока
+
+
+cars = pg.sprite.Group() - группа для машин
+
+
+rockets = pg.sprite.Group() - группа для ракет
+
+
+
+
+
+class Player -класс отвечающий за все действия со стороны игрока
+
+update() -управление
+
+
+class Car - класс отвечающий за другие машины
+
+update() - передвижение и удаление
+
+
+class Rocket - класс отвечающий за ракеты
+
+update() - передвижение и удаление
+
+
+class Road - класс отвечающий за взаимодействие предыдущих классов и элементов
+
+check() - проверка на столкновения
+
+draw_road() - отрисовка дороги
+
+draw_sprites() - отрисовка спрайтов
+
+spawn_cars() - спавн машин, в зависимости от развития игры, чем дальше тем больше
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+menu.py
+
+
+
+import pygame
+
+
+from music import menu_music, game_music, channel, pressing, moving
+
+
+
+
+
+
+
+
+
+
+
+class Menu: - общий класс от которого наследуются другие
+
+
+   def __init__(self, width: int, height: int, objects: dict, font_size: int):
+
+
+       self.width = width
+
+
+       self.height = height
+
+
+       self.margin = 0
+
+
+
+
+
+
+
+       self.functions = list(objects.values()) - функции кнопок экрана
+
+
+       self.texts = list(objects.keys()) - текст функций
+
+
+
+
+
+
+
+       self.label_color = pygame.Color((255, 255, 255)) - цвет текста
+
+
+       self.label_color_focused = pygame.Color((4, 90, 200)) - цвет фокус текс
+
+
+       self.bg_color = pygame.Color((100, 190, 85)) - цвет экрана
+
+
+       self.font = pygame.font.Font('data/fonts/19255.ttf', font_size) -шрифт
+
+
+
+
+
+
+
+       self.surface = pygame.Surface((self.width, self.height)) - поверхность
+
+
+
+
+
+
+
+       self.rendered_labels = []
+
+
+       self.rendered_labels_focused = []
+
+
+
+
+
+
+
+       for i in self.texts:
+
+
+           self.rendered_labels.append(self.font.render(i, True, self.label_color))
+
+
+           self.rendered_labels_focused.append(self.font.render(i, True, self.label_color_focused)) - подготовка текстовых прямоугольников
+
+
+
+
+
+
+
+       self.label_rects = []
+
+
+
+
+
+
+
+       self.moving_cursor = (False, -1) - курсор на кнопке
+
+
+
+
+
+
+
+   def generate_label_rects(self, y):
+
+
+       y = y
+
+
+
+
+
+
+
+       text_rects = []
+
+
+
+
+
+
+
+       for i in self.texts:
+
+
+           rect = pygame.rect.Rect(
+
+
+               ((self.width - self.font.size(i)[0]) // 2, y),
+
+
+               self.font.size(i))
+
+
+
+
+
+
+
+           text_rects.append(rect)
+
+
+
+
+
+
+
+           y += self.margin + self.font.size(i)[1]
+
+
+
+
+
+
+
+       return text_rects
+
+
+
+
+
+
+
+   def draw_text(self):
+
+
+       mx, my = pygame.mouse.get_pos()
+
+
+
+
+
+
+
+       m1, m2, m3 = pygame.mouse.get_pressed()
+
+
+
+
+
+
+
+       for i in range(len(self.texts)):
+
+
+           if self.label_rects[i].collidepoint(mx, my):
+
+
+               if self.moving_cursor[1] != i:
+
+
+                   self.moving_cursor = (True, i)
+
+
+
+
+
+
+
+               self.surface.blit(self.rendered_labels_focused[i], self.label_rects[i])
+
+
+
+
+
+
+
+               if m1:
+
+
+                   pressing.play()
+
+
+                   pygame.time.delay(2000)
+
+
+                   self.functions[i]()
+
+
+           else:
+
+
+               self.surface.blit(self.rendered_labels[i], self.label_rects[i])
+
+
+
+
+
+
+
+
+
+
+
+
+class Game_Menu(Menu):
+
+
+   def __init__(self, width: int, height: int, objects: dict, font_size: int):
+
+
+       super().__init__(width, height, objects, font_size)
+
+
+
+
+
+
+
+       self.margin = 25
+
+
+
+
+
+
+
+       self.surface_alpha = 120
+
+
+       self.surface.set_alpha(self.surface_alpha)
+
+
+
+
+
+
+
+       self.font_height = font_size
+
+
+
+
+
+
+
+       self.menu_width = self.font.size(max(self.texts))[0] + self.margin * 2
+
+
+
+
+
+
+
+       self.menu_height = len(self.texts) * (self.font_height + self.margin) + self.margin
+
+
+
+
+
+
+
+       self.menu_rect = pygame.rect.Rect((self.width - self.menu_width) // 2,
+
+
+                                         (self.height - self.menu_height) // 2,
+
+
+                                         self.menu_width, self.menu_height)
+
+
+
+
+
+
+
+       self.label_rects = self.generate_label_rects(self.menu_rect.y + self.margin)
+
+
+
+
+
+
+
+       for x, y in zip(self.rendered_labels, self.rendered_labels_focused):
+
+
+           x.set_alpha(self.surface_alpha)
+
+
+           y.set_alpha(self.surface_alpha)
+
+
+
+
+
+
+
+   def render(self):
+
+
+       if self.moving_cursor[0]:
+
+
+           moving.stop()
+
+
+           moving.play()
+
+
+           self.moving_cursor = (False, self.moving_cursor[1])
+
+
+       pygame.draw.rect(self.surface,
+
+
+                        self.bg_color,
+
+
+                        self.menu_rect, border_radius=7)
+
+
+
+
+
+
+
+       self.draw_text()
+
+
+
+
+
+
+
+       return self.surface
+
+
+
+
+
+
+
+
+
+
+
+
+class Main_Menu(Menu):
+
+
+   def __init__(self, width, height, objects: dict, font_size: int, score: int):
+
+
+       super().__init__(width, height, objects, font_size)
+
+
+
+
+
+
+
+       channel.play(menu_music[0])
+
+
+       channel.queue(menu_music[1])
+
+
+
+
+
+
+
+       self.name_font = pygame.font.SysFont('Arial', int(font_size * 2), True)
+
+
+
+
+
+
+
+       self.name_fs = int(font_size * 1.25)
+
+
+       self.margin = 35
+
+
+       self.bottom_margin = 150
+
+
+
+
+
+
+
+       self.game_name = 'Racer'
+
+
+
+
+
+
+
+       self.rendered_name = self.name_font.render(self.game_name, True, self.label_color)
+
+
+       self.label_rects = self.generate_label_rects(
+
+
+           self.margin * 4 + self.rendered_name.get_height())
+
+
+       self.draw_text = self.draw_name(self.draw_text)
+
+
+       self.score_font = pygame.font.Font('data/fonts/19255.ttf', font_size - 20)
+
+
+       self.scores = score
+
+
+       self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True,
+
+
+                                                     self.label_color)
+
+
+
+
+
+
+
+   def update_scores(self, score):
+
+
+       self.scores = score
+
+
+       self.rendered_scores = self.score_font.render('High score: ' + str(self.scores), True,
+
+
+                                                     self.label_color)
+
+
+
+
+
+
+
+   def draw_name(self, func):
+
+
+       def decorated_draw():
+
+
+           func()
+
+
+           self.name_rect = pygame.rect.Rect(
+
+
+               (self.width - self.rendered_name.get_width()) // 2,
+
+
+               self.margin * 2, self.rendered_name.get_width(),
+
+
+               self.rendered_name.get_height())
+
+
+           self.surface.blit(self.rendered_name, self.name_rect)
+
+
+
+
+
+
+
+       return decorated_draw
+
+
+
+
+
+
+
+   def render(self):
+
+
+       if self.moving_cursor[0]:
+
+
+           moving.stop()
+
+
+           moving.play()
+
+
+           self.moving_cursor = (False, self.moving_cursor[1])
+
+
+       self.surface.fill(self.bg_color)
+
+
+       self.surface.blit(self.rendered_scores, (10, 10))
+
+
+       self.draw_text()
+
+
+       return self.surface
+
+
+
+
+
+
+
+
+
+
+
+
+class Authors:
+
+
+   def __init__(self, width, height) -> None:
+
+
+       self.surface = pygame.Surface((width, height))
+
+
+       self.bg_color = pygame.Color((100, 190, 85))
+
+
+       self.font_size = 30
+
+
+       self.lines = map(lambda x: x.replace('\n', ''),
+
+
+                        open('data/texts/authors.txt', 'r', encoding='utf-8').readlines())
+
+
+
+
+
+
+
+       self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
+
+
+       self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
+
+
+
+
+
+
+
+   def render(self):
+
+
+       self.surface.fill(self.bg_color)
+
+
+       for num, i in enumerate(self.rendered_text):
+
+
+           self.surface.blit(i, (10, num * self.font_size + 40))
+
+
+       return self.surface
+
+
+
+
+
+
+
+
+
+
+
+
+class GameInfo:
+
+
+   def __init__(self, width, height) -> None:
+
+
+       self.surface = pygame.Surface((width, height))
+
+
+       self.bg_color = pygame.Color((100, 190, 85))
+
+
+       self.font_size = 30
+
+
+       self.lines = map(lambda x: x.replace('\n', ''),
+
+
+                        open('data/texts/game_info.txt', 'r', encoding='utf-8').readlines())
+
+
+
+
+
+
+
+       self.font = pygame.font.Font('data/fonts/Roboto-Regular.ttf', self.font_size)
+
+
+       self.rendered_text = [self.font.render(i, True, (250, 250, 250)) for i in self.lines]
+
+
+
+
+
+
+
+   def render(self):
+
+
+       self.surface.fill(self.bg_color)
+
+
+       for num, i in enumerate(self.rendered_text):
+
+
+           self.surface.blit(i, (10, num * self.font_size + 40))
+
+
+       return self.surface
+
+
+
+class Menu - общий класс для меню,обобщает некоторые функции
+
+generate_label_rects() - создает готовые элементы текста для вывода на экран
+
+draw_texts() - отрисовка текста, при нажатии вызывает функцию кнопки
+
+
+class Game_menu(Menu) - наследуется от Menu и имеет слегка расширенный функционал
+
+render() - полностью отрисовывает меню, производит звуковые эффекты
+
+
+class Main_menu(Menu) - наследуется от Menu, имеет больше привилегий задач
+
+render() - полная отрисовка
+update_score() - обновление счета
+draw_name() - декоратор, расширяет возможности draw_texts() для отрисовки названия игры
